@@ -16,18 +16,32 @@ import { CheckoutComponent } from './components/checkout/checkout.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './components/login/login.component';
 import { LoginStatusComponent } from './components/login-status/login-status.component';
-import { OKTA_CONFIG, OktaAuthModule, OktaCallbackComponent } from '@okta/okta-angular';
+import {
+  OKTA_CONFIG,
+  OktaAuthModule,
+  OktaCallbackComponent,
+} from '@okta/okta-angular';
 import myAppConfig from './config/my-app-config';
+import { MembersPageComponent } from './components/members-page/members-page.component';
+import { OktaAuthGuard } from '@okta/okta-angular';
 
-const oktaConfig = Object.assign({
-  onAuthRequired: (injector) => {
-    const router = injector.get(Router);
+const oktaConfig = Object.assign(
+  {
+    onAuthRequired: (oktaAuth, injector) => {
+      const router = injector.get(Router);
 
-    router.navigate(['/login']);
-  }
-}, myAppConfig.oidc);
+      router.navigate(['/login']);
+    },
+  },
+  myAppConfig.oidc
+);
 
 const routes: Routes = [
+  {
+    path: 'members',
+    component: MembersPageComponent,
+    canActivate: [OktaAuthGuard],
+  },
   { path: 'login/callback', component: OktaCallbackComponent },
   { path: 'login', component: LoginComponent },
 
@@ -53,6 +67,7 @@ const routes: Routes = [
     CheckoutComponent,
     LoginComponent,
     LoginStatusComponent,
+    MembersPageComponent,
   ],
   imports: [
     RouterModule.forRoot(routes),
@@ -60,9 +75,9 @@ const routes: Routes = [
     HttpClientModule,
     NgbModule,
     ReactiveFormsModule,
-    OktaAuthModule
+    OktaAuthModule,
   ],
   providers: [ProductService, { provide: OKTA_CONFIG, useValue: oktaConfig }],
   bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
